@@ -126,7 +126,8 @@ int ChannelList::AddChannel(const string& channel) {
 }
 
 int ChannelList::FindChannel(const string& channel) {
-    cout << "Entering to FindChannel\r\n";
+    cout << "Entering to FindChannel\r\n"; 
+    /*этого не нужно*/
     int id = -1;
     m.lock();
     try
