@@ -42,7 +42,7 @@ private:
 
     ChannelList channelList;
     DataFile dataFile;
-    IndexFile indexFile;
+    //IndexFile indexFile;
 };
 
 #endif /* RECORDER_HPP */

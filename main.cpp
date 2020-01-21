@@ -23,7 +23,7 @@
 #include <iostream> //close()
 #include <signal.h>
 #include <dirent.h>
-#define cout cout << "<MAIN>: " 
+#define dcout if(DEBUG)cout << "<MAIN>: " 
 
 using namespace std;
 
@@ -56,29 +56,25 @@ int main(int argc, char** argv) {
     }
     else{
         
-        system("mkdir "strPathToArchive);
+        system("mkdir " strPathToArchive);
         cout << "Dir not exist\r\n";
     }
     
     setbuf(stdout, NULL);
     setbuf(stderr, NULL);
     setExitFunction();
-    cout << "Creating recorder\r\n";
+    dcout << "Creating recorder\r\n";
     Recorder recorder;
-    cout << "Recorder was created\r\n";
-    cout << "Runing recorder\r\n";
+    dcout << "Recorder was created\r\n";
+    dcout << "Runing recorder\r\n";
     recorder.Run();
-    cout << "Recorder was run\r\n";
-    cout << "Going to sleep for 100 sec\r\n";
-    //    while(!exitFlag){
-    //        usleep(5000);
-    //    }
+    
+    dcout << "Recorder was run\r\n";
+    
+    //Ждём пока система остановиться
+    
     recorder.thr->join();
-    //recorder.thr->join();
-    //this_thread::sleep_for(chrono::seconds(30));
-    cout << "Waking up\r\n";
-
-
+    dcout << "Waking up\r\n";
     cout << "exit\r\n";
     return 0;
 }

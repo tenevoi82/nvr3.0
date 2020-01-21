@@ -10,20 +10,19 @@
  * 
  * Created on 10 января 2020 г., 11:49
  */
-
 #include "Recorder.hpp"
 #include <netinet/ip.h>
 #include <string.h>
-#define cout cout << "<Recorder>: " 
+#define dcout if(DEBUG) cout << "<Recorder>: " 
 
 Recorder::Recorder() {
-    cout << "Creating class Recorder\r\n";
+    dcout << "Creating class Recorder\r\n";
     dataFile.SetChannelList(channelList);
 
 }
 
 Recorder::~Recorder() {
-    cout << "Distroing class Recorder\r\n";
+    dcout << "Distroing class Recorder\r\n";
 }
 
 extern bool exitFlag;
@@ -35,10 +34,6 @@ void Recorder::WorkWithFFMPEG() {
 
     while (!exitFlag)
     {
-//        cout << "while\r\n";
-//        this_thread::sleep_for(chrono::seconds(1));
-//        continue;
-//        cout << "while2\r\n";
         newsock = accept(MainSocket, NULL, NULL);
         if (newsock < 0)
         {
@@ -53,7 +48,6 @@ void Recorder::WorkWithFFMPEG() {
         sscanf(buf,
                 "c:%s\ti:%d\tf:%s\ts:%Lf\td:%f\te:%Lf\tdir:%s",
                 segment.camname, &segment.index, segment.filename, &segment.start, &segment.duration, &segment.end, segment.source_dir);
-
         dataFile.AddDataToFile(segment);
 
         shutdown(newsock, SHUT_RDWR);
@@ -113,5 +107,4 @@ void Recorder::Run() {
 
     thr = new thread([&]() {
         WorkWithFFMPEG(); });
-  
 }

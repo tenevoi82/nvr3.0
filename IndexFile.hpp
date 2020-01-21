@@ -18,16 +18,21 @@
 #include <string>
 #include <iostream>
 
+#include "structures.hpp"
+#include "settings.hpp"
+
 using namespace std;
 
 class IndexFile {
 public:
-    IndexFile();
-    IndexFile(const IndexFile& orig);
-    virtual ~IndexFile();
+    IndexFile(string chName);
+    bool AddData(struct videodatapart & data);
+    bool CreateFile();
 private:
-    FILE * currentFile;
+    string chName;
     string FileName;
+    FILE * file = NULL;
+    string PathToFileDir = strPathToArchive;    
 
 };
 

@@ -16,10 +16,10 @@
 #include <string.h>
 #include <functional>
 
-#define cout cout << "<ChannelList>: " 
+#define dcout if(DEBUG)cout << "<ChannelList>: " 
 
 void ChannelList::SaveChandes() {
-    cout << "Entering to SaveChandes\r\n";
+    dcout << "Entering to SaveChandes\r\n";
     return ;
     m.lock();
     if (file == NULL)
@@ -29,13 +29,13 @@ void ChannelList::SaveChandes() {
             cout << "Cannot open data file. " << strerror(errno) << "\r\n";
             file = NULL;
             m.unlock();
-            cout << "Exiting from SaveChandes\r\n";            
+            dcout << "Exiting from SaveChandes\r\n";            
             return;
         }
     }
     cout << "File is not null\r\n" ;
     fwrite(&version, sizeof (version), 1, file);
-    cout << "fwrite version is complited\r\n";
+    dcout << "fwrite version is complited\r\n";
     for (auto const &it : items)
     {
         cout << "for\r\n";
@@ -46,7 +46,7 @@ void ChannelList::SaveChandes() {
     fclose(file);
     file = NULL;
     m.unlock();
-    cout << "Exiting from SaveChandes\r\n";
+    dcout << "Exiting from SaveChandes\r\n";
 }
 
 void ChannelList::Print() {
@@ -84,7 +84,7 @@ void ChannelList::LoadFromDisk() {
     struct channels_item item;
     while (fread(&item, sizeof (item), 1, file) != 0)
         items.emplace(item.chName, item);
-    cout << "Load channel list complit.\r\n";
+    dcout << "Load channel list complit.\r\n";
     fclose(file);
     file = NULL;
     m.unlock();
@@ -92,13 +92,13 @@ void ChannelList::LoadFromDisk() {
 }
 
 ChannelList::ChannelList() {
-    cout << "Creating class ChannelList\r\n";
+    dcout << "Creating class ChannelList\r\n";
 
 }
 
 ChannelList::~ChannelList() {
     SaveChandes();
-    cout << "Distroing class ChannelList\r\n";    
+    dcout << "Distroing class ChannelList\r\n";    
     for (auto elemelem : items)
     {
         cout << elemelem.first << " " << elemelem.second.chName << " " << elemelem.second.id << "\r\n" ;
@@ -107,7 +107,7 @@ ChannelList::~ChannelList() {
 }
 
 int ChannelList::AddChannel(const string& channel) {
-    cout << "Entering to AddChannel\r\n";
+    dcout << "Entering to AddChannel\r\n";
     struct channels_item item;
     memset(item.chName, 0, sizeof (item.chName));
     strncpy(item.chName, channel.c_str(), channel.size());
@@ -121,12 +121,12 @@ int ChannelList::AddChannel(const string& channel) {
         SaveChandes();
         return res.first->second.id;
     }
-    cout << "Exiting from AddChannel\r\n";
+    dcout << "Exiting from AddChannel\r\n";
     return 0;
 }
 
 int ChannelList::FindChannel(const string& channel) {
-    cout << "Entering to FindChannel\r\n"; 
+    dcout << "Entering to FindChannel\r\n"; 
     /*этого не нужно*/
     int id = -1;
     m.lock();
@@ -140,7 +140,7 @@ int ChannelList::FindChannel(const string& channel) {
         id = -1;
     }
     m.unlock();
-    cout << "Exiting from FindChannel\r\n";
+    dcout << "Exiting from FindChannel\r\n";
     return id;
 
 }

@@ -22,10 +22,10 @@
 #include <sys/statfs.h>
 
 #include "DataFile.hpp"
-#define cout cout << "<DataFile>: " 
+#define dcout if(DEBUG)cout << "<DataFile>: " 
 
 DataFile::DataFile() {
-    cout << "Creating class DataFile\r\n";
+    dcout << "Creating class DataFile\r\n";
 }
 
 bool DataFile::SetChannelList(ChannelList &channels) {
@@ -34,16 +34,20 @@ bool DataFile::SetChannelList(ChannelList &channels) {
 }
 
 bool DataFile::AddDataToFile(segment_timecontext &segment) {
-    cout << "Enering to AddDataToFile\r\n";
+    dcout << "Enering to AddDataToFile\r\n";
+    int id;
     if (File == NULL)
-        if(!CreateNewDataFile(segment)){
-            return false;
+        if (CreateNewDataFile(segment))
+        {
+            return true;
         }
-    int id = channels->FindChannel(segment.camname);
+    //найти номер канала
+    id = channels->FindChannel(segment.camname);
     if (id == -1)
         id = channels->AddChannel(segment.camname);
-    //todo проверить размер файла, и если слишком много то создать новый
-    if(!CheckFreeSpace(PathToFileDir.c_str(),MAXDATASIZE)){
+    //проверить размер файла, и если слишком много то создать новый
+    if (!CheckFreeSpace(PathToFileDir.c_str(), MAXDATASIZE))
+    {
         //todo delete last file;
         cout << "Нет достаточного места на диске\r\n";
         cout << "**************\r\n";
@@ -52,6 +56,7 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
         cout << "******  ******\r\n";
         cout << "**************\r\n";
     }
+
     char sourcefilepath[PATH_MAX];
     sprintf(sourcefilepath, "%s/%s", segment.source_dir, segment.filename);
     cout << "Sourcefile = " << sourcefilepath << "\r\n";
@@ -61,16 +66,16 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
     else
     {
         cout << "openfile false:" << strerror(errno) << "\r\n";
-        cout << "Exiting from AddDataToFile\r\n";
-        return false;
+        dcout << "Exiting from AddDataToFile\r\n";
+        return true;
     }
     //перемотать курсор файла в конец
     if (fseek(File, 0L, SEEK_END) != 0)
     {
         cout << "fseek dest file error:" << strerror(errno) << "\r\n";
         fclose(soursefile);
-        cout << "Exiting from AddDataToFile\r\n";
-        return false;
+        dcout << "Exiting from AddDataToFile\r\n";
+        return true;
     } else
     {
         cout << "fseek dest file OK\r\n";
@@ -93,18 +98,52 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
     cout << "считанно " << readed * sourcefilesize << "byte\r\n";
     //дописать весь файл в файл назначения
     long writed = fwrite(buffer, sourcefilesize, 1, File);
-    if (writed != 0)
+    if (writed == 1)
+    {
         cout << "записанно " << writed * sourcefilesize << "byte\r\n";
-    else
+        if (SAVEWRITE)fflush(File);
+    } else
     {
         cout << "Ошибка записи:" << strerror(errno) << "\r\n";
         fclose(soursefile);
-        cout << "Exiting from AddDataToFile\r\n";
-        return false;
+        free(buffer);
+        dcout << "Exiting from AddDataToFile\r\n";
+        return true;
     }
     //записать положения курсора большого файлы в переменную
     long dest_end_pos = ftell(File);
     cout << "записанно от " << dest_start_pos << " до " << dest_end_pos << "\r\n";
+
+    videodatapart temp;
+    temp.startTime = segment.start;
+    temp.duration = segment.duration;
+    temp.pos = dest_start_pos;
+    temp.size = dest_end_pos - dest_start_pos;
+
+    //printf("start:%lf duration:%f start_pos:%d size:%d\r\n",temp.startTime,temp.duration,temp.pos,temp.size);
+
+
+    //найти нужный индекс файл
+    auto it = indexFiles.find(segment.camname);
+    if (it == indexFiles.end())
+    {
+        it = indexFiles.emplace(segment.camname, IndexFile(segment.camname)).first;
+    }
+
+    //добавить данные в нужный индекс файл
+    if ((*it).second.AddData(temp))
+    {
+        //освободить памать 
+        free(buffer);
+        //закрыть копируемый файл 
+        fclose(soursefile);
+        dcout << "Exiting from AddDataToFile\r\n";        
+        return true;
+    }
+
+
+
+
     //освободить памать 
     free(buffer);
     //закрыть копируемый файл 
@@ -113,14 +152,14 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
     if (unlink(sourcefilepath) != 0)
     {
         cout << "delete dest file error:" << strerror(errno) << "\r\n";
-        cout << "Exiting from AddDataToFile\r\n";
-        return false;
+        dcout << "Exiting from AddDataToFile\r\n";
+        return true;
     } else
     {
         cout << "delete dest file OK.\r\n";
     }
-    cout << "Exiting from AddDataToFile\r\n";
-    return true;
+    dcout << "Exiting from AddDataToFile\r\n";
+    return false;
 }
 
 bool DataFile::CheckFreeSpace(const char *diskpath, long mustHave) {
@@ -133,8 +172,6 @@ bool DataFile::CheckFreeSpace(const char *diskpath, long mustHave) {
         return false;
 };
 
-
-
 long DataFile::getfilesize(FILE *f) {
     struct stat st;
     fstat(fileno(f), &st);
@@ -142,21 +179,21 @@ long DataFile::getfilesize(FILE *f) {
 };
 
 bool DataFile::CreateNewDataFile(segment_timecontext &segment) {
-    cout << "Entering to CreateNewDataFile\r\n";
+    dcout << "Entering to CreateNewDataFile\r\n";
     auto t = time(NULL);
     char tmp[PATH_MAX];
     sprintf(tmp, "%s%011ld-data", PathToFileDir.c_str(), t);
     if ((File = fopen(tmp, "ab+")) == NULL)
     {
         cout << "Cannot open data file. " << strerror(errno) << "\r\n";
-        return false;
+        return true;
     }
     cout << "creating new file" << tmp << "\r\n";
-    cout << "Exiting from CreateNewDataFile\r\n";
-    return true;
+    dcout << "Exiting from CreateNewDataFile\r\n";
+    return false;
 }
 
 DataFile::~DataFile() {
-    cout << "Distroing class DataFile\r\n";
+    dcout << "Distroing class DataFile\r\n";
 }
 

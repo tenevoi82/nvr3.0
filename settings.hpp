@@ -21,6 +21,7 @@
 #define BUF_SIZE 1024
 #define strPathToArchive "/var/www/video/archive/record/"
 #define MAXDATASIZE 50*1024*1024
+#define SAVEWRITE 1
 
 #endif /* SETTINGS_HPP */
 

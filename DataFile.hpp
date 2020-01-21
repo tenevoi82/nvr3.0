@@ -36,6 +36,7 @@ private:
     string FileName;
     string PathToFileDir = strPathToArchive;
     ChannelList *channels;
+    map<string,IndexFile> indexFiles;
 };
 
 #endif /* DATAFILE_HPP */
