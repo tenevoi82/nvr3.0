@@ -30,15 +30,14 @@ DataFile::DataFile() {
 
 bool DataFile::SetChannelList(ChannelList &channels) {
     this->channels = &channels;
-    File = NULL;
+    file = NULL;
 }
 
 bool DataFile::AddDataToFile(segment_timecontext &segment) {
     dcout << "Enering to AddDataToFile\r\n";
     int id;
-    if (File == NULL)
-        if (CreateNewDataFile(segment))
-        {
+    if (file == NULL)
+        if (CreateNewDataFile(segment)) {
             return true;
         }
     //найти номер канала
@@ -46,8 +45,7 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
     if (id == -1)
         id = channels->AddChannel(segment.camname);
     //проверить размер файла, и если слишком много то создать новый
-    if (!CheckFreeSpace(PathToFileDir.c_str(), MAXDATASIZE))
-    {
+    if (!CheckFreeSpace(pathToFileDir.c_str(), MAXDATASIZE)) {
         //todo delete last file;
         cout << "Нет достаточного места на диске\r\n";
         cout << "**************\r\n";
@@ -63,30 +61,26 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
     FILE * soursefile = fopen(sourcefilepath, "rb");
     if (soursefile != NULL)
         cout << "openfile OK\r\n";
-    else
-    {
+    else {
         cout << "openfile false:" << strerror(errno) << "\r\n";
         dcout << "Exiting from AddDataToFile\r\n";
         return true;
     }
     //перемотать курсор файла в конец
-    if (fseek(File, 0L, SEEK_END) != 0)
-    {
+    if (fseek(file, 0L, SEEK_END) != 0) {
         cout << "fseek dest file error:" << strerror(errno) << "\r\n";
         fclose(soursefile);
         dcout << "Exiting from AddDataToFile\r\n";
         return true;
-    } else
-    {
+    } else {
         cout << "fseek dest file OK\r\n";
     }
     //записать положение курсора в переменную
-    long dest_start_pos = ftell(File);
+    long dest_start_pos = ftell(file);
     //узнать размер копируемого файла
-    if (dest_start_pos > 50 * 1024 * 1024)
-    {
-        fclose(File);
-        File = NULL;
+    if (dest_start_pos > 50 * 1024 * 1024) {
+        fclose(file);
+        file = NULL;
         AddDataToFile(segment);
     }
     long sourcefilesize = getfilesize(soursefile);
@@ -97,13 +91,11 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
     long readed = fread(buffer, sourcefilesize, 1, soursefile);
     cout << "считанно " << readed * sourcefilesize << "byte\r\n";
     //дописать весь файл в файл назначения
-    long writed = fwrite(buffer, sourcefilesize, 1, File);
-    if (writed == 1)
-    {
+    long writed = fwrite(buffer, sourcefilesize, 1, file);
+    if (writed == 1) {
         cout << "записанно " << writed * sourcefilesize << "byte\r\n";
-        if (SAVEWRITE)fflush(File);
-    } else
-    {
+        if (SAVEWRITE)fflush(file);
+    } else {
         cout << "Ошибка записи:" << strerror(errno) << "\r\n";
         fclose(soursefile);
         free(buffer);
@@ -111,7 +103,7 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
         return true;
     }
     //записать положения курсора большого файлы в переменную
-    long dest_end_pos = ftell(File);
+    long dest_end_pos = ftell(file);
     cout << "записанно от " << dest_start_pos << " до " << dest_end_pos << "\r\n";
 
     videodatapart temp;
@@ -125,19 +117,17 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
 
     //найти нужный индекс файл
     auto it = indexFiles.find(segment.camname);
-    if (it == indexFiles.end())
-    {
+    if (it == indexFiles.end()) {
         it = indexFiles.emplace(segment.camname, IndexFile(segment.camname)).first;
     }
 
     //добавить данные в нужный индекс файл
-    if ((*it).second.AddData(temp))
-    {
+    if ((*it).second.AddData(temp,prefixName)) {
         //освободить памать 
         free(buffer);
         //закрыть копируемый файл 
         fclose(soursefile);
-        dcout << "Exiting from AddDataToFile\r\n";        
+        dcout << "Exiting from AddDataToFile\r\n";
         return true;
     }
 
@@ -149,13 +139,11 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
     //закрыть копируемый файл 
     fclose(soursefile);
     //удалить копируемый файл
-    if (unlink(sourcefilepath) != 0)
-    {
+    if (unlink(sourcefilepath) != 0) {
         cout << "delete dest file error:" << strerror(errno) << "\r\n";
         dcout << "Exiting from AddDataToFile\r\n";
         return true;
-    } else
-    {
+    } else {
         cout << "delete dest file OK.\r\n";
     }
     dcout << "Exiting from AddDataToFile\r\n";
@@ -180,15 +168,16 @@ long DataFile::getfilesize(FILE *f) {
 
 bool DataFile::CreateNewDataFile(segment_timecontext &segment) {
     dcout << "Entering to CreateNewDataFile\r\n";
-    auto t = time(NULL);
-    char tmp[PATH_MAX];
-    sprintf(tmp, "%s%011ld-data", PathToFileDir.c_str(), t);
-    if ((File = fopen(tmp, "ab+")) == NULL)
-    {
+    if(file!=NULL){
+        cout << "!!! this is not first start";
+    }
+    prefixName = to_string(time(NULL));
+    fileName = pathToFileDir + prefixName + "-data";
+    if ((file = fopen(fileName.c_str(), "ab+")) == NULL) {
         cout << "Cannot open data file. " << strerror(errno) << "\r\n";
         return true;
     }
-    cout << "creating new file" << tmp << "\r\n";
+    cout << "creating new file" << fileName << "\r\n";
     dcout << "Exiting from CreateNewDataFile\r\n";
     return false;
 }

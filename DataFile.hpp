@@ -32,9 +32,10 @@ private:
     bool CreateNewDataFile(segment_timecontext&);
     long getfilesize(FILE *);
     bool CheckFreeSpace(const char *diskpath, long mustHave); //возвращает false если места не достаточно
-    FILE * File;
-    string FileName;
-    string PathToFileDir = strPathToArchive;
+    FILE * file;
+    string fileName;
+    string prefixName;
+    string pathToFileDir = strPathToArchive;
     ChannelList *channels;
     map<string,IndexFile> indexFiles;
 };

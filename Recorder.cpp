@@ -28,16 +28,16 @@ Recorder::~Recorder() {
 extern bool exitFlag;
 
 void Recorder::WorkWithFFMPEG() {
+    running = true;
     cout << "Starting new thread for main work of recorder and my id is " << getpid() << "\r\n";
     int newsock;
     char buf[BUF_SIZE];
 
-    while (!exitFlag)
-    {
+    while (!exitFlag) {
         newsock = accept(MainSocket, NULL, NULL);
-        if (newsock < 0)
-        {
+        if (newsock < 0) {
             cout << "accept() failed:" << strerror(errno) << "\r\n";
+            running = false;
             return;
         }
         int count = 0;
@@ -57,13 +57,13 @@ void Recorder::WorkWithFFMPEG() {
     shutdown(MainSocket, SHUT_RDWR);
     fcloseall();
     cout << "Stoping thread of main work of recorder and my id is " << this_thread::get_id() << "\r\n";
+    running = false;
 }
 
 bool Recorder::NetInit() {
     struct sockaddr_in serv_addr;
     int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0)
-    {
+    if (sock < 0) {
         cout << "socket create failed: " << strerror(errno) << "\r\n";
         return false;
     }
@@ -71,25 +71,21 @@ bool Recorder::NetInit() {
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(INPUTPORT);
-    for (int count = 0; bind(sock, (struct sockaddr *) &serv_addr, sizeof (serv_addr)) < 0; count++)
-    {
+    for (int count = 0; bind(sock, (struct sockaddr *) &serv_addr, sizeof (serv_addr)) < 0; count++) {
         cout << "bind socket failed: " << strerror(errno) << " retry after " << RETRY_NETWORCK_REINIT_SECOND << "second\r\n";
-        if (count > RETRY_NETWORCK_REINIT_COUNT)
-        {
+        if (count > RETRY_NETWORCK_REINIT_COUNT) {
             cout << "The maximum number of network setup attempts has been reached.\r\n";
             return false;
         }
         std::this_thread::sleep_for(std::chrono::seconds(RETRY_NETWORCK_REINIT_SECOND));
     }
-    if (sock <= 0)
-    {
+    if (sock <= 0) {
         cout << "Critical network error! abort\r\n";
         return false;
     }
     cout << "Network Initialization Successful\r\n";
 
-    if (listen(sock, SOMAXCONN) == -1)
-    {
+    if (listen(sock, SOMAXCONN) == -1) {
         cout << "socket listen failed: " << strerror(errno) << "\r\n";
         return false;
     }
@@ -99,12 +95,12 @@ bool Recorder::NetInit() {
 
 void Recorder::Run() {
     cout << "Startting recorder\r\n";
-    if (!NetInit())
-    {
+    if (!NetInit()) {
         cout << "NET INIT ERROR\r\n";
         return;
     }
 
     thr = new thread([&]() {
         WorkWithFFMPEG(); });
+    sleep(1);
 }

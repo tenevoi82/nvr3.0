@@ -14,9 +14,9 @@
 #ifndef SETTINGS_HPP
 #define SETTINGS_HPP
 
-#define DEBUG 0
+#define DEBUG 1
 #define INPUTPORT 6000
-#define RETRY_NETWORCK_REINIT_SECOND 6
+#define RETRY_NETWORCK_REINIT_SECOND 1
 #define RETRY_NETWORCK_REINIT_COUNT  10
 #define BUF_SIZE 1024
 #define strPathToArchive "/var/www/video/archive/record/"

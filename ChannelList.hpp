@@ -33,11 +33,14 @@ public:
     int FindChannel(const string& channel);     
 private:
     void LoadFromDisk();
-    void SaveChandes();
+    bool SaveChandes();
+    bool CreateFile();
     mutex m;
     map<string, struct channels_item> items;
-    FILE *file;
-    const int version = 4;
+    FILE *file =NULL;
+    string fileName;
+    string pathToFileDir = strPathToArchive;
+    int versionOfFile = 4;
     array<IndexFile,0>  indexFiles;
 };
 

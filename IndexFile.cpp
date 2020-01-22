@@ -22,35 +22,34 @@ IndexFile::IndexFile(string chName) {
     this->chName = chName;
 }
 
-bool IndexFile::AddData(struct videodatapart & data) {
-    if(file==NULL){
+bool IndexFile::AddData(struct videodatapart & data, const string & prefix) {
+    if (file == NULL) {
         cout << "Creating file IndexFile         **********************\r\n";
-        if (CreateFile()){
+        if (CreateFile(prefix)) {
             cout << "index flile error\r\n";
             return true;
         }
     }
-    size_t writed=-1;
-    size_t size = sizeof(struct videodatapart);
-    writed = fwrite(&data,size,1,file);
-    if(writed == 1){
-        if(SAVEWRITE)fflush(file); //for write imidiatli
+    size_t writed = -1;
+    size_t size = sizeof (struct videodatapart);
+    writed = fwrite(&data, size, 1, file);
+    if (writed == 1) {
+        if (SAVEWRITE)fflush(file); //for write imidiatli
         return false;
-    }
-    else{
-        cout << "ERROR Write index file\r\n";        
+    } else {
+        cout << "ERROR Write index file\r\n";
         return true;
     }
     cout << "writed " << writed << "bytes from " << size << " to indexfile\r\n";
     return false;
 }
 
-bool IndexFile::CreateFile() {
+bool IndexFile::CreateFile(const string & prefix) {
+
     dcout << "Entering to CreateNewIndexFile\r\n";
-    char tmp[PATH_MAX];
-    sprintf(tmp, "%s%s.index", PathToFileDir.c_str(),chName.c_str());
-    if ((file = fopen(tmp, "ab+")) == NULL)
-    {
+    this->prefix = prefix;
+    FileName  = PathToFileDir + prefix + "-index-"+chName;
+    if ((file = fopen(FileName.c_str(), "ab+")) == NULL) {
         cout << "Cannot open index file. " << strerror(errno) << "\r\n";
         return true;
     }

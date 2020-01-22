@@ -26,11 +26,12 @@ using namespace std;
 class IndexFile {
 public:
     IndexFile(string chName);
-    bool AddData(struct videodatapart & data);
-    bool CreateFile();
+    bool AddData(struct videodatapart & data, const string & prefix);
+    bool CreateFile(const string & prefix);
 private:
     string chName;
     string FileName;
+    string prefix;
     FILE * file = NULL;
     string PathToFileDir = strPathToArchive;    
 

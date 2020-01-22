@@ -34,14 +34,16 @@ public:
     Recorder();
     void Run();
     virtual ~Recorder();
+    bool running = false;
 private:
     void WorkWithFFMPEG();
     bool NetInit();
-    
+
     int MainSocket = -1;
 
     ChannelList channelList;
     DataFile dataFile;
+
     //IndexFile indexFile;
 };
 
