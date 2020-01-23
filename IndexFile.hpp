@@ -28,6 +28,7 @@ public:
     IndexFile(string chName);
     bool AddData(struct videodatapart & data, const string & prefix);
     bool CreateFile(const string & prefix);
+    virtual ~IndexFile();
 private:
     string chName;
     string FileName;

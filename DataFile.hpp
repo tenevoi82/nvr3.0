@@ -32,12 +32,15 @@ private:
     bool CreateNewDataFile(segment_timecontext&);
     long getfilesize(FILE *);
     bool CheckFreeSpace(const char *diskpath, long mustHave); //возвращает false если места не достаточно
-    FILE * file;
+    
+    //найти номер канала
+    int GetChannelNumberByName(const struct segment_timecontext & );
+    FILE * file = NULL;
     string fileName;
     string prefixName;
     string pathToFileDir = strPathToArchive;
     ChannelList *channels;
-    map<string,IndexFile> indexFiles;
+    map<string, IndexFile> indexFiles;
 };
 
 #endif /* DATAFILE_HPP */

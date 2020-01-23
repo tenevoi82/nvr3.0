@@ -37,7 +37,7 @@ bool IndexFile::AddData(struct videodatapart & data, const string & prefix) {
         if (SAVEWRITE)fflush(file); //for write imidiatli
         return false;
     } else {
-        cout << "ERROR Write index file\r\n";
+        cout << "ERROR: Write index file\r\n";
         return true;
     }
     cout << "writed " << writed << "bytes from " << size << " to indexfile\r\n";
@@ -45,13 +45,20 @@ bool IndexFile::AddData(struct videodatapart & data, const string & prefix) {
 }
 
 bool IndexFile::CreateFile(const string & prefix) {
-
-    dcout << "Entering to CreateNewIndexFile\r\n";
+    if (file != NULL) {
+        fflush(file);
+        fclose(file);
+        file = NULL;
+    }
     this->prefix = prefix;
-    FileName  = PathToFileDir + prefix + "-index-"+chName;
+    FileName = PathToFileDir + prefix + "-index-" + chName;
     if ((file = fopen(FileName.c_str(), "ab+")) == NULL) {
         cout << "Cannot open index file. " << strerror(errno) << "\r\n";
         return true;
     }
     return false;
+}
+
+IndexFile::~IndexFile() {
+    dcout << "Destroing class IndexFile *************************\r\n";
 }

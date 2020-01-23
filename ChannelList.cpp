@@ -22,8 +22,10 @@
 
 bool ChannelList::SaveChandes() {
     dcout << "Entering to SaveChandes\r\n";
+    fclose(file);
+    CreateFile();
     m.lock();
-    fseek(file, sizeof (versionOfFile), SEEK_SET);
+    //fseek(file, sizeof (versionOfFile), SEEK_SET);
     for (auto const &it : items) {
         fwrite(&it.second, sizeof (it.second), 1, file);
         cout << "WRWRWR\r\n";
@@ -108,7 +110,6 @@ ChannelList::~ChannelList() {
 }
 
 int ChannelList::AddChannel(const string& channel) {
-    dcout << "Entering to AddChannel\r\n";
     struct channels_item item;
     memset(item.chName, 0, sizeof (item.chName));
     strncpy(item.chName, channel.c_str(), channel.size());
@@ -119,32 +120,28 @@ int ChannelList::AddChannel(const string& channel) {
     if (res.second) {
         cout << "Channel " << item.chName << " added\r\n";
         if (fwrite(&item, sizeof (item), 1, file) != 1) {
-
+            cout << "error write add channel to file\r\n";
         } else {
-            cout << "WRWRWR\r\n";
-            dcout << "Exiting from AddChannel\r\n";
+            fflush(file);
             return -1;
         }
         return res.first->second.id;
     }
-    dcout << "Exiting from AddChannel\r\n";
     return 0;
 }
 
 int ChannelList::FindChannel(const string& channel) {
-    dcout << "Entering to FindChannel\r\n";
     /*этого не нужно*/
     int id = -1;
     m.lock();
     try {
         id = items.at(channel).id;
-        cout << "FOUND CHANNEL WITH ID " << id << "\r\n";
+        //cout << "FOUND CHANNEL WITH ID " << id << "\r\n";
     } catch (...) {
         cout << "CHANNEL NOT FOUND\r\n";
         id = -1;
     }
     m.unlock();
-    dcout << "Exiting from FindChannel\r\n";
     return id;
 
 }
@@ -155,14 +152,12 @@ bool ChannelList::CreateFile() {
         fclose(file);
         file = NULL;
     }
-    if ((file = fopen(fileName.c_str(), "ab+")) == NULL) {
-        cout << "Cannot open data file. " << strerror(errno) << "\r\n";
+    if ((file = fopen(fileName.c_str(), "wb+")) == NULL) {
+        cout << "ERROR: Cannot open data file. " << strerror(errno) << "\r\n";
         file = NULL;
         m.unlock();
         return true;
     }
     fwrite(&versionOfFile, sizeof (versionOfFile), 1, file);
-    dcout << "fwrite version is complited\r\n";
-    cout << "Create channels file is comlited\r\n";
     m.unlock();
 }
