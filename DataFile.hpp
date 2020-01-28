@@ -22,6 +22,7 @@
 
 
 using namespace std;
+
 class DataFile {
 public:
     DataFile();
@@ -32,9 +33,10 @@ private:
     bool CreateNewDataFile(segment_timecontext&);
     long getfilesize(FILE *);
     bool CheckFreeSpace(const char *diskpath, long mustHave); //возвращает false если места не достаточно
-    
+
     //найти номер канала
-    int GetChannelNumberByName(const struct segment_timecontext & );
+    int GetChannelNumberByName(const struct segment_timecontext &);
+    void ConctatIndexFiles();
     FILE * file = NULL;
     string fileName;
     string prefixName;

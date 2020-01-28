@@ -29,12 +29,12 @@ public:
     bool AddData(struct videodatapart & data, const string & prefix);
     bool CreateFile(const string & prefix);
     virtual ~IndexFile();
+    string FileName;
 private:
     string chName;
-    string FileName;
     string prefix;
     FILE * file = NULL;
-    string PathToFileDir = strPathToArchive;    
+    string PathToFileDir = strPathToArchive;
 
 };
 

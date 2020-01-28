@@ -41,7 +41,6 @@ private:
     string fileName;
     string pathToFileDir = strPathToArchive;
     int versionOfFile = 4;
-    array<IndexFile,0>  indexFiles;
 };
 
 

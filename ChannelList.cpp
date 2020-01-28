@@ -21,19 +21,18 @@
 #define dcout  cout << "<ChannelList>: " 
 
 bool ChannelList::SaveChandes() {
-    dcout << "Entering to SaveChandes\r\n";
     fclose(file);
     CreateFile();
     m.lock();
     //fseek(file, sizeof (versionOfFile), SEEK_SET);
     for (auto const &it : items) {
-        fwrite(&it.second, sizeof (it.second), 1, file);
-        cout << "WRWRWR\r\n";
+        if ((fwrite(&it.second, sizeof (it.second), 1, file)) != 1) {
+            cout << "ERROR: write data to channels file\r\n";
+            return true;
+        }
     }
     fflush(file);
-    cout << "Saving channel list\r\n";
     m.unlock();
-    dcout << "Exiting from SaveChandes\r\n";
     return false;
 }
 
@@ -49,33 +48,31 @@ void ChannelList::Print() {
 }
 
 void ChannelList::LoadFromDisk() {
-    dcout << "Entering to LoadChandes\r\n";
     m.lock();
     if (file == NULL) {
         if ((file = fopen(fileName.c_str(), "rb+")) == NULL) {
             m.unlock();
             if (CreateFile()) {
-                cout << "ERROR OPEN CHANNELS FILE;\r\n";
+                cout << "ERROR: open channels file;\r\n";
                 return;
             } else {
                 m.lock();
             }
         } else {
             if (fread(&versionOfFile, sizeof (versionOfFile), 1, file) != 1) {
-                cout << "read version error\r\n";
+                cout << "ERROR: read version error\r\n";
                 fclose(file);
                 file = NULL;
                 m.unlock();
                 return;
             } else {
                 if (versionOfFile != 4) {
-                    cout << "WRONG FILE VERSION\r\n";
+                    cout << "ERROR: Wron file version\r\n";
                     fclose(file);
                     file = NULL;
                     m.unlock();
                     return;
-                } else
-                    cout << "FILE VERSION IS OK (" << versionOfFile << ")\r\n";
+                }
                 items.clear();
             }
         }
@@ -85,11 +82,8 @@ void ChannelList::LoadFromDisk() {
     struct channels_item item;
     while (fread(&item, sizeof (item), 1, file) != 0)
         items.emplace(item.chName, item);
-    cout << "readed " << items.size() << "\r\n";
-    dcout << "Load channel list complit.\r\n";
     m.unlock();
     Print();
-    // sleep(100);
 }
 
 ChannelList::ChannelList() {
@@ -120,7 +114,7 @@ int ChannelList::AddChannel(const string& channel) {
     if (res.second) {
         cout << "Channel " << item.chName << " added\r\n";
         if (fwrite(&item, sizeof (item), 1, file) != 1) {
-            cout << "error write add channel to file\r\n";
+            cout << "ERROR: write add channel to file\r\n";
         } else {
             fflush(file);
             return -1;
@@ -131,19 +125,15 @@ int ChannelList::AddChannel(const string& channel) {
 }
 
 int ChannelList::FindChannel(const string& channel) {
-    /*этого не нужно*/
-    int id = -1;
+    int id;
     m.lock();
-    try {
-        id = items.at(channel).id;
-        //cout << "FOUND CHANNEL WITH ID " << id << "\r\n";
-    } catch (...) {
-        cout << "CHANNEL NOT FOUND\r\n";
+    auto it = items.find(channel);
+    if (it != items.end())
         id = -1;
-    }
+    else
+        id = (*it).second.id;
     m.unlock();
     return id;
-
 }
 
 bool ChannelList::CreateFile() {

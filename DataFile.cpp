@@ -20,6 +20,7 @@
 #include <stdlib.h>
 
 #include <sys/statfs.h>
+#include <vector>
 
 #include "DataFile.hpp"
 #define dcout if(DEBUG)cout << "<DataFile>: " 
@@ -33,23 +34,22 @@ bool DataFile::SetChannelList(ChannelList &channels) {
     this->channels = &channels;
 }
 
-
 int DataFile::GetChannelNumberByName(const struct segment_timecontext & segment) {
     int id;
     id = channels->FindChannel(segment.camname); //пробуем найти номер канала
     if (id == -1) //если не найден 
         id = channels->AddChannel(segment.camname); //пробуем добавить
     if (id == -1) // если все равно -1 значит ошибка
-        cout << "ERROR: error add channel";
+        cout << "ERROR: error add channel\r\n";
     return id; //ошибка если -1
 }
 
 bool DataFile::AddDataToFile(segment_timecontext &segment) {
     int currentChannelNumber;
-    map<string,IndexFile>::iterator current_index_data;
+    map<string, IndexFile>::iterator current_index_data;
     IndexFile * currentIndexFile = NULL;
-    
-    
+
+
     if (file == NULL)
         if (CreateNewDataFile(segment)) {
             return true;
@@ -93,6 +93,7 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
 
     //проверить не превышает ли размер дата файла допустимый.
     if (dest_start_pos > MAXDATASIZE) {
+        //ConctatIndexFiles();
         CreateNewDataFile(segment);
         //найти в списке нужный индекс файл по имени канала
         current_index_data = indexFiles.find(segment.camname);
@@ -156,15 +157,58 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
         cout << "ERROR: delete dest file error:" << strerror(errno) << "\r\n";
         dcout << "Exiting from AddDataToFile\r\n";
         return true;
-    } 
+    }
 
     return false;
+}
+
+void DataFile::ConctatIndexFiles() {
+#pragma pack(push,1)
+
+    struct pos {
+        int id;
+        long start;
+        long stop;
+    };
+#pragma pack(pop)
+
+    vector<struct pos> ar;
+    string dstfname = pathToFileDir + prefixName + ".i";
+    FILE * dst = fopen(dstfname.c_str(), "wb+");
+    for (auto &it : indexFiles) {
+        int id = channels->FindChannel(it.first);
+        long start = ftell(file);
+        cout << "o " << it.second.FileName << "";
+        FILE * src = fopen(it.second.FileName.c_str(), "rb");
+        if (src == NULL) cout << "error open file\r\n";
+        size_t srcsize = getfilesize(src);
+        cout << "size = " << srcsize << "\r\n";
+
+        char * srcdata = (char*) malloc(srcsize);
+        size_t readed = fread(srcdata, srcsize, 1, src);
+        cout << "r -> " << srcsize * readed << "\r\n";
+        size_t writed = fwrite(srcdata, srcsize, 1, dst);
+        cout << "wr -> " << srcsize * writed << "\r\n";
+        fflush(dst);
+        long stop = ftell(dst);
+
+        struct pos s;
+        s.id = id;
+        s.start = start;
+        s.stop = stop;
+        ar.push_back(s);
+        fclose(src);
+        free(srcdata);
+        unlink(it.second.FileName.c_str());
+    }
+    fclose(dst);
+
 }
 
 bool DataFile::CheckFreeSpace(const char *diskpath, long mustHave) {
     struct statfs buf;
     statfs(diskpath, &buf);
-    //cout << "space free " << buf.f_bsize * buf.f_bavail << "\r\n";
+    cout << "space free " << (buf.f_bsize * buf.f_bavail) / 1024 / 1024 << "MB\r\n";
     if (buf.f_bsize * buf.f_bavail > mustHave)
         return true;
 

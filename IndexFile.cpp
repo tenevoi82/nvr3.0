@@ -18,15 +18,13 @@
 #define dcout if(DEBUG)cout << "<IndexFile>: " 
 
 IndexFile::IndexFile(string chName) {
-    dcout << "Creating class IndexFile *************************\r\n";
     this->chName = chName;
 }
 
 bool IndexFile::AddData(struct videodatapart & data, const string & prefix) {
     if (file == NULL) {
-        cout << "Creating file IndexFile         **********************\r\n";
         if (CreateFile(prefix)) {
-            cout << "index flile error\r\n";
+            cout << "ERROR: create index flile error\r\n";
             return true;
         }
     }
@@ -40,7 +38,7 @@ bool IndexFile::AddData(struct videodatapart & data, const string & prefix) {
         cout << "ERROR: Write index file\r\n";
         return true;
     }
-    cout << "writed " << writed << "bytes from " << size << " to indexfile\r\n";
+    //cout << "writed " << writed << "bytes from " << size << " to indexfile\r\n";
     return false;
 }
 
@@ -53,12 +51,11 @@ bool IndexFile::CreateFile(const string & prefix) {
     this->prefix = prefix;
     FileName = PathToFileDir + prefix + "-index-" + chName;
     if ((file = fopen(FileName.c_str(), "ab+")) == NULL) {
-        cout << "Cannot open index file. " << strerror(errno) << "\r\n";
+        cout << "ERROR: Cannot open index file. " << strerror(errno) << "\r\n";
         return true;
     }
     return false;
 }
 
 IndexFile::~IndexFile() {
-    dcout << "Destroing class IndexFile *************************\r\n";
 }
