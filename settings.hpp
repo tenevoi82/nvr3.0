@@ -16,8 +16,8 @@
 
 #define DEBUG 1
 #define INPUTPORT 6000
-#define RETRY_NETWORCK_REINIT_SECOND 1
-#define RETRY_NETWORCK_REINIT_COUNT  10
+#define RETRY_NETWORCK_REINIT_SECOND 3
+#define RETRY_NETWORCK_REINIT_COUNT  5
 #define BUF_SIZE 1024
 #define strPathToArchive "/var/www/video/archive/record/"
 #define MAXDATASIZE 50*1024*1024

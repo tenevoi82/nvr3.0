@@ -16,7 +16,6 @@
 #define dcout if(DEBUG) cout << "<Recorder>: " 
 
 Recorder::Recorder() {
-    dcout << "Creating class Recorder\r\n";
     dataFile.SetChannelList(channelList);
 
 }
@@ -84,6 +83,10 @@ bool Recorder::NetInit() {
         return false;
     }
 
+    int enable = 1;
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+    cout << strerror(errno) << "\r\n";
+    
     if (listen(sock, SOMAXCONN) == -1) {
         cout << "ERROR: socket listen failed: " << strerror(errno) << "\r\n";
         return false;

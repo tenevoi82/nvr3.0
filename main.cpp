@@ -46,8 +46,12 @@ void setExitFunction() {
 }
 
 int main(int argc, char** argv) {
-
-
+    setbuf(stdout, NULL);
+    setbuf(stderr, NULL);
+    setExitFunction();
+    
+    system("killall -9 segment_mover");
+    
     DIR* recDir = opendir(strPathToArchive);
     if (recDir) {
         /* Directory exists. */
@@ -58,16 +62,9 @@ int main(int argc, char** argv) {
         cout << "Dir not exist\r\n";
     }
 
-    setbuf(stdout, NULL);
-    setbuf(stderr, NULL);
-    setExitFunction();
-    dcout << "Creating recorder\r\n";
-    Recorder recorder;
-    dcout << "Recorder was created\r\n";
-    dcout << "Runing recorder\r\n";
-    recorder.Run();
 
-    dcout << "Recorder was run\r\n";
+    Recorder recorder;
+    recorder.Run();
 
     //Ждём пока система остановиться
     if (recorder.running)

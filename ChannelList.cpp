@@ -48,6 +48,7 @@ void ChannelList::Print() {
 }
 
 void ChannelList::LoadFromDisk() {
+    cout << "loading channels list from disk\r\n";
     m.lock();
     if (file == NULL) {
         if ((file = fopen(fileName.c_str(), "rb+")) == NULL) {
@@ -80,16 +81,17 @@ void ChannelList::LoadFromDisk() {
 
 
     struct channels_item item;
-    while (fread(&item, sizeof (item), 1, file) != 0)
+    while (fread(&item, sizeof (item), 1, file) != 0){
         items.emplace(item.chName, item);
+    }
     m.unlock();
-    Print();
 }
 
 ChannelList::ChannelList() {
-    dcout << "Creating class ChannelList\r\n";
+    cout << "Creating class ChannelList\r\n";
     fileName = pathToFileDir + "channels";
     LoadFromDisk();
+    Print();
 
 }
 
@@ -104,11 +106,12 @@ ChannelList::~ChannelList() {
 }
 
 int ChannelList::AddChannel(const string& channel) {
+    cout << "Adding channel to channellist\r\n";
     struct channels_item item;
     memset(item.chName, 0, sizeof (item.chName));
     strncpy(item.chName, channel.c_str(), channel.size());
-    item.id = items.size();
-    item.firstStart = 999L;
+    item.id = items.size()+1;
+    item.firstStart = time(NULL);
 
     auto res = items.emplace(channel, item);
     if (res.second) {
@@ -128,7 +131,7 @@ int ChannelList::FindChannel(const string& channel) {
     int id;
     m.lock();
     auto it = items.find(channel);
-    if (it != items.end())
+    if (it == items.end())
         id = -1;
     else
         id = (*it).second.id;
@@ -137,6 +140,7 @@ int ChannelList::FindChannel(const string& channel) {
 }
 
 bool ChannelList::CreateFile() {
+    cout << "Creating channellist file\r\n";
     m.lock();
     if (file != NULL) {
         fclose(file);
