@@ -8,6 +8,7 @@
       <itemPath>DataFile.cpp</itemPath>
       <itemPath>IndexFile.cpp</itemPath>
       <itemPath>Recorder.cpp</itemPath>
+      <itemPath>Scheduller.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="HeaderFiles"
@@ -17,6 +18,7 @@
       <itemPath>DataFile.hpp</itemPath>
       <itemPath>IndexFile.hpp</itemPath>
       <itemPath>Recorder.hpp</itemPath>
+      <itemPath>Scheduller.hpp</itemPath>
       <itemPath>settings.hpp</itemPath>
       <itemPath>structures.hpp</itemPath>
     </logicalFolder>
@@ -49,8 +51,10 @@
           <standard>8</standard>
         </ccTool>
         <linkerTool>
+          <commandlineTool>g++</commandlineTool>
           <linkerLibItems>
             <linkerLibStdlibItem>PosixThreads</linkerLibStdlibItem>
+            <linkerLibLibItem>stdc++fs</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
@@ -69,6 +73,13 @@
       <item path="Recorder.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Recorder.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Scheduller.cpp" ex="false" tool="1" flavor2="11">
+        <ccTool>
+          <additionalDep></additionalDep>
+        </ccTool>
+      </item>
+      <item path="Scheduller.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -118,6 +129,10 @@
       <item path="Recorder.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Recorder.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Scheduller.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Scheduller.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>

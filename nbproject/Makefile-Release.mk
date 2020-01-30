@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/DataFile.o \
 	${OBJECTDIR}/IndexFile.o \
 	${OBJECTDIR}/Recorder.o \
+	${OBJECTDIR}/Scheduller.o \
 	${OBJECTDIR}/main.o
 
 
@@ -85,6 +86,11 @@ ${OBJECTDIR}/Recorder.o: Recorder.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Recorder.o Recorder.cpp
+
+${OBJECTDIR}/Scheduller.o: Scheduller.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Scheduller.o Scheduller.cpp
 
 ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}

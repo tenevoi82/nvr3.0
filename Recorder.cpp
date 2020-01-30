@@ -15,16 +15,17 @@
 #include <string.h>
 #define dcout if(DEBUG) cout << "<Recorder>: " 
 
-Recorder::Recorder() {
-    dataFile.SetChannelList(channelList);
+extern bool exitFlag;
+
+Recorder::Recorder(ChannelList& ch) {
+    channelList = &ch;
+    dataFile.SetChannelList(*channelList);
 
 }
 
 Recorder::~Recorder() {
     dcout << "Distroing class Recorder\r\n";
 }
-
-extern bool exitFlag;
 
 void Recorder::WorkWithFFMPEG() {
     running = true;
@@ -42,7 +43,6 @@ void Recorder::WorkWithFFMPEG() {
         int count = 0;
         count = read(newsock, buf, BUF_SIZE);
         buf[count] = 0;
-        //cout << buf << "\r\n";
         struct segment_timecontext segment;
         sscanf(buf,
                 "c:%s\ti:%d\tf:%s\ts:%Lf\td:%f\te:%Lf\tdir:%s",

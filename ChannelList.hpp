@@ -31,12 +31,12 @@ public:
     virtual ~ChannelList();
     void Print();
     int FindChannel(const string& channel);     
+    map<string, struct channels_item> items;    
 private:
     void LoadFromDisk();
     bool SaveChandes();
     bool CreateFile();
     mutex m;
-    map<string, struct channels_item> items;
     FILE *file =NULL;
     string fileName;
     string pathToFileDir = strPathToArchive;

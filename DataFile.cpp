@@ -21,6 +21,7 @@
 
 #include <sys/statfs.h>
 #include <vector>
+#include <experimental/filesystem>
 
 #include "DataFile.hpp"
 #define dcout if(DEBUG)cout << "<DataFile>: " 
@@ -37,7 +38,6 @@ bool DataFile::SetChannelList(ChannelList &channels) {
 int DataFile::GetChannelNumberByName(const struct segment_timecontext & segment) {
     int id;
     id = channels->FindChannel(segment.camname); //пробуем найти номер канала
-    cout << "id = " << id << "\r\n";
     if (id == -1) //если не найден 
         id = channels->AddChannel(segment.camname); //пробуем добавить
     if (id == -1) // если все равно -1 значит ошибка
@@ -66,11 +66,7 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
     {
         cout << "channel number not found\r\n";
         return true;
-    } else
-    {
-        cout << "channel number found -> " << currentChannelNumber << " \r\n";
-    }
-
+    } 
     //найти в списке нужный индекс файл по имени канала
     current_index_data = indexFiles.find(segment.camname);
     if (current_index_data == indexFiles.end())
@@ -185,7 +181,7 @@ bool DataFile::AddDataToFile(segment_timecontext &segment) {
 }
 
 void DataFile::ConctatIndexFiles() {
-    if(indexFiles.empty())
+    if (indexFiles.empty())
         return;
 #pragma pack(push,1)
 
@@ -196,43 +192,28 @@ void DataFile::ConctatIndexFiles() {
     };
 #pragma pack(pop)
 
-   
     vector<struct pos> ar;
     string dstfname = pathToFileDir + prefixName + ".i";
     FILE * dst = fopen(dstfname.c_str(), "wb+");
-    cout << "test\r\n";fflush(stdout);
     for (auto &it : indexFiles)
     {
-        cout << "test 3\r\n";fflush(stdout);
         int id = channels->FindChannel(it.first);
-        cout << "test 3.1\r\n";fflush(stdout);
-        if(file==NULL)
-            cout << "file NULL \r\n";
-        else
-            cout << "file NOT NULL \r\n";
         long start = ftell(dst);
-        cout << "test 3.2\r\n";fflush(stdout);
-        cout << "o " << it.second.FileName << "";
-        cout << "test 3.3\r\n";fflush(stdout);
-        FILE * src = fopen(it.second.FileName.c_str(), "rb");
-        cout << "test 3.4\r\n";fflush(stdout);
-        if (src == NULL) cout << "error open file\r\n";
-        cout << "test 3.5\r\n";fflush(stdout);
+        //cout << "o " << it.second.FileName << "";
+        FILE * src = it.second.file;
         size_t srcsize = getfilesize(src);
-        cout << "size = " << srcsize << "\r\n";
+        //cout << "size = " << srcsize << "\r\n";
 
-        cout << "test 4\r\n";fflush(stdout);
-        
         char * srcdata = (char*) malloc(srcsize);
+        fseek(src,0,0);
         size_t readed = fread(srcdata, srcsize, 1, src);
-        cout << "r -> " << srcsize * readed << "\r\n";
+        //cout << "r -> " << srcsize * readed << "\r\n";
         size_t writed = fwrite(srcdata, srcsize, 1, dst);
-        cout << "wr -> " << srcsize * writed << "\r\n";
+        //cout << "wr -> " << srcsize * writed << "\r\n";
         fflush(dst);
         long stop = ftell(dst);
 
-        cout << "test 5\r\n";
-        
+
         struct pos s;
         s.id = id;
         s.start = start;
@@ -240,33 +221,35 @@ void DataFile::ConctatIndexFiles() {
         ar.push_back(s);
 
 
-    cout << "test 6\r\n";
-
         fclose(src);
         free(srcdata);
         unlink(it.second.FileName.c_str());
     }
 
-    cout << "test2\r\n";
-    
     for (auto &it : ar)
     {
-        fwrite(&it, sizeof(it), 1, dst);
+        fwrite(&it, sizeof (it), 1, dst);
     }
     auto count = ar.size();
-    fwrite(&count,sizeof(count),1,dst);
+    fwrite(&count, sizeof (count), 1, dst);
     fflush(dst);
     fclose(dst);
 
 }
 
-bool DataFile::CheckFreeSpace(const char *diskpath, long mustHave) {
-    struct statfs buf;
-    statfs(diskpath, &buf);
-    cout << "space free " << (buf.f_bsize * buf.f_bavail) / 1024 / 1024 << "MB\r\n";
-    if (buf.f_bsize * buf.f_bavail > mustHave)
-        return true;
+bool DataFile::CheckFreeSpace(const char *diskpath, uintmax_t mustHave) {
 
+    namespace fs = std::experimental::filesystem;
+    fs::path p = fs::path(diskpath);
+    std::error_code er;
+    uintmax_t free = fs::space(p, er).available;
+    if (er)
+    {
+        cout << er.message() << "\r\n";
+        return true;
+    }
+    if (free > mustHave)
+        return true;
     else
         return false;
 };
@@ -284,11 +267,11 @@ bool DataFile::CreateNewDataFile(segment_timecontext &segment) {
         fflush(file);
         fclose(file);
         file = NULL;
-    }    
+    }
     ConctatIndexFiles();
-    
+
     prefixName = to_string(time(NULL));
-    fileName = pathToFileDir + prefixName + "-data";
+    fileName = pathToFileDir + prefixName + ".data";
     if ((file = fopen(fileName.c_str(), "ab+")) == NULL)
     {
         cout << "ERROR: Cannot open data file. " << strerror(errno) << "\r\n";

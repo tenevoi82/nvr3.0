@@ -32,7 +32,7 @@ public:
 private:
     bool CreateNewDataFile(segment_timecontext&);
     long getfilesize(FILE *);
-    bool CheckFreeSpace(const char *diskpath, long mustHave); //возвращает false если места не достаточно
+    bool CheckFreeSpace(const char *diskpath, uintmax_t mustHave); //возвращает false если места не достаточно
 
     //найти номер канала
     int GetChannelNumberByName(const struct segment_timecontext &);

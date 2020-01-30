@@ -31,17 +31,17 @@
 class Recorder {
 public:
     thread * thr;
-    Recorder();
+    Recorder(ChannelList&);
     void Run();
     virtual ~Recorder();
     bool running = false;
+    ChannelList* channelList;
 private:
     void WorkWithFFMPEG();
     bool NetInit();
 
     int MainSocket = -1;
 
-    ChannelList channelList;
     DataFile dataFile;
 
     //IndexFile indexFile;

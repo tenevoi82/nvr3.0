@@ -30,10 +30,10 @@ public:
     bool CreateFile(const string & prefix);
     virtual ~IndexFile();
     string FileName;
+    FILE * file = NULL;    
 private:
     string chName;
     string prefix;
-    FILE * file = NULL;
     string PathToFileDir = strPathToArchive;
 
 };

@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/DataFile.o \
 	${OBJECTDIR}/IndexFile.o \
 	${OBJECTDIR}/Recorder.o \
+	${OBJECTDIR}/Scheduller.o \
 	${OBJECTDIR}/main.o
 
 
@@ -56,7 +57,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-lpthread
+LDLIBSOPTIONS=-lpthread -lstdc++fs
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -64,7 +65,7 @@ LDLIBSOPTIONS=-lpthread
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nvr3.0: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nvr3.0 ${OBJECTFILES} ${LDLIBSOPTIONS}
+	g++ -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/nvr3.0 ${OBJECTFILES} ${LDLIBSOPTIONS}
 
 ${OBJECTDIR}/ChannelList.o: ChannelList.cpp
 	${MKDIR} -p ${OBJECTDIR}
@@ -85,6 +86,11 @@ ${OBJECTDIR}/Recorder.o: Recorder.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Recorder.o Recorder.cpp
+
+${OBJECTDIR}/Scheduller.o: Scheduller.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Scheduller.o Scheduller.cpp
 
 ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}

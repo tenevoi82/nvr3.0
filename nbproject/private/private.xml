@@ -9,14 +9,14 @@
         <group name="arduinotest">
             <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/DataFile.hpp</file>
             <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/Recorder.cpp</file>
-            <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/IndexFile.hpp</file>
-            <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/ChannelList.hpp</file>
             <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/IndexFile.cpp</file>
+            <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/ChannelList.hpp</file>
+            <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/Scheduller.hpp</file>
             <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/main.cpp</file>
             <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/structures.hpp</file>
             <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/ChannelList.cpp</file>
             <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/DataFile.cpp</file>
-            <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/settings.hpp</file>
+            <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/Scheduller.cpp</file>
             <file>file:/home/tenevoi/NetBeansProjects/nvr3.0/Recorder.hpp</file>
         </group>
     </open-files>

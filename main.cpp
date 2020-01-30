@@ -13,6 +13,7 @@
 
 
 #include "Recorder.hpp"
+#include "Scheduller.hpp"
 
 #include <cstdlib>
 #include <map>
@@ -23,6 +24,7 @@
 #include <iostream> //close()
 #include <signal.h>
 #include <dirent.h>
+#include <experimental/filesystem>
 #define dcout if(DEBUG)cout << "<MAIN>: " 
 
 using namespace std;
@@ -49,22 +51,43 @@ int main(int argc, char** argv) {
     setbuf(stdout, NULL);
     setbuf(stderr, NULL);
     setExitFunction();
-    
+
     system("killall -9 segment_mover");
-    
+
     DIR* recDir = opendir(strPathToArchive);
-    if (recDir) {
+    if (recDir)
+    {
         /* Directory exists. */
         closedir(recDir);
-    } else {
+    } else
+    {
 
         system("mkdir " strPathToArchive);
         cout << "Dir not exist\r\n";
     }
 
+    ChannelList channelList;
 
-    Recorder recorder;
+    Recorder recorder(channelList);
     recorder.Run();
+
+
+
+
+    Scheduller g;
+
+    g.Init(&recorder, &channelList);
+
+    while (!exitFlag)
+    {
+        namespace fs = std::experimental::filesystem;
+        fs::path p = fs::path(strPathToArchive);
+        uintmax_t free = fs::space(p).available;
+
+        if (free < MAXDATASIZE * 2)
+            g.DelLast();
+        this_thread::sleep_for(chrono::microseconds(100));
+    }
 
     //Ждём пока система остановиться
     if (recorder.running)
